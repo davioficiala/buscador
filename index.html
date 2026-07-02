@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Busca Firebase</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f1720;
+      color: white;
+      padding: 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 250px;
+      border: none;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #22c55e;
+      color: white;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .item {
+      background: #1e293b;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
+    }
+
+    a {
+      color: #38bdf8;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🔎 Buscar produtos</h2>
+
+<input id="busca" placeholder="Digite: tomate">
+<button onclick="buscar()">Buscar</button>
+
+<div id="lista"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // 🔥 FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyAE2VcJyqu01rtqlgVoMg634FFfTGxiRgc",
+    authDomain: "brain-orcamento.firebaseapp.com",
+    projectId: "brain-orcamento",
+    storageBucket: "brain-orcamento.firebasestorage.app",
+    messagingSenderId: "991853359315",
+    appId: "1:991853359315:web:b2270aab447a853b212426"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const lista = document.getElementById("lista");
+  const busca = document.getElementById("busca");
+
+  let dados = [];
+
+  // 🔥 CARREGA DADOS DO FIREBASE
+  onSnapshot(collection(db, "dados"), (snapshot) => {
+    dados = [];
+
+    snapshot.forEach(doc => {
+      dados.push(doc.data());
+    });
+  });
+
+  // 🔎 FUNÇÃO DO BOTÃO
+  window.buscar = function () {
+    const filtro = busca.value.toLowerCase();
+
+    const resultado = dados.filter(item =>
+      (item.titulo || "").toLowerCase().includes(filtro)
+    );
+
+    lista.innerHTML = "";
+
+    if (resultado.length === 0) {
+      lista.innerHTML = "❌ Nada encontrado";
+      return;
+    }
+
+    resultado.forEach(item => {
+      lista.innerHTML += `
+        <div class="item">
+          <h3>${item.titulo}</h3>
+          <p>💰 R$ ${item.valor}</p>
+          <a href="${item.link || "#"}" target="_blank">Abrir</a>
+        </div>
+      `;
+    });
+  };
+</script>
+
+</body>
+</html>
